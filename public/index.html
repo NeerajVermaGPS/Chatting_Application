@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/styles/global.css">
+    <link rel="stylesheet" href="/styles/index.css">
+    <title>NChat</title>
+</head>
+<body>
+    <section class="center column modal-section full-hw fixed_00 modalopen">
+        <div id="modal-one" class="modal center full-hw fixed_00 open">
+          <div id="content-one" class="modal-content open">
+            <h2>Welcome to NChat</h2>
+            <p>Please provide following details to continue</p>
+            <input type="text" name="node-name" id="node-name" placeholder="Enter your name"><br>
+            <input type="text" name="node-image" id="node-image" placeholder="Enter your profile url"><br>
+            <button type="button" class="close-button" onclick="toggleModalOne()" aria-label="Close modal">Continue</button>
+          </div>
+        </div>
+      </section>
+    <section class="msger">
+        <header class="msger-header full-w">
+          <div class="msger-header-title center">NChat</div>
+          <div class="msger-header-options">
+            <span onclick="toggleModalOne()">
+                <img src="/assets/menu.svg" alt="menu" class="menu_btn">
+            </span>
+          </div>
+        </header>
+      
+        <main class="msger-chat full-w"></main>
+      
+        <form class="msger-inputarea full-w">
+          <input type="text" class="msger-input" placeholder="Enter your message...">
+          <button type="submit" class="msger-send-btn">Send</button>
+        </form>
+      </section>
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="/scripts/msg.js"></script>
+</body>
+</html>
