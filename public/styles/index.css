@@ -91,6 +91,10 @@
     margin-top: 4px;
 }
 
+.msg-info-time img {
+    height: 20px;
+}
+
 .msg-text {
     font-size: 13px;
 }
@@ -111,6 +115,23 @@
 
 .right-msg .msg-img {
     margin: 0 0 0 10px;
+}
+
+.error-msg {
+    background: #f8b7b7 !important;
+    color: #dc143c !important;
+}
+
+.msg-status {
+    font-size: 10px;
+    position: relative;
+    top: 7px;
+    justify-content: end;
+}
+
+#status-img img {
+    height: 10px;
+    margin-left: 4px;
 }
 
 .msger-inputarea {
@@ -207,6 +228,10 @@
 
 input:focus {
     outline: none;
+}
+
+input:disabled {
+    background-color: #2b3035;
 }
 
 ::placeholder {

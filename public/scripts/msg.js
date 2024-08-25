@@ -22,10 +22,12 @@ const toggleModalOne = () => {
     modalOne.classList.add('open')
     modalOneContent.classList.add('open')
     modalSec.classList.add("modalopen")
+    nodeImage.focus()
   }
 }
 
 const setNode = () => {
+    nodeName.setAttribute("disabled", "true")
     user = nodeName.value === "" ? user : nodeName.value
     profileImg = nodeImage.value === "" ? profileImg : nodeImage.value
 }
@@ -36,27 +38,50 @@ msgerForm.addEventListener("submit", event => {
   const msgText = msgerInput.value;
   if (!msgText) return;
 
-  appendMessage(user, profileImg, "right", msgText);
-  socket.emit("user-message", {msg: msgText, id: user, image: profileImg})
+  appendMessage("You", profileImg, "right", msgText);
+  const pending = document.querySelector(".pending")
+  console.log(pending)
+  socket.timeout(3000).emit("user-message", {msg: msgText, id: user, image: profileImg, time: formatDate(new Date())}, (err, res) => {
+    const msgBubble = pending.querySelector(".msg-bubble");
+    const statusMsg = pending.querySelector("#status-text");
+    const statusImg = pending.querySelector("#status-img");
+    if(err) {
+        msgBubble.classList.add("error-msg")
+        statusMsg.textContent = "Not sent"
+        statusMsg.style.color = "#dc143c"
+        statusImg.innerHTML = "<img src='/assets/err.svg' alt='error'>"
+    } else {
+        statusMsg.textContent = "Sent"
+        statusMsg.style.color = "#84d36b"
+        statusImg.innerHTML = "<img src='/assets/sent.svg' alt='sent'>"
+    }
+  })
+  pending.classList.remove("pending")
   msgerInput.value = "";
 });
 
 socket.on('bot-message', (msg) => {
-    appendMessage(msg.id, msg.image, "left", msg.msg);
+    appendMessage(msg.id, msg.image, "left", msg.msg, true);
 });
 
-function appendMessage(name, img, side, text) {
+console.log(socket.connected)
+
+function appendMessage(name, img, side, text, bot, time = formatDate(new Date())) {
+  const status = bot ? "" : `<div class='msg-status full-w center'><div class='center' id='status-text' style="color: #6495ed">Sending...</div><div class='center' id='status-img'></div></div>`
+  const statusClass = bot ? "" : " pending"
   const msgHTML = `
-    <div class="msg ${side}-msg">
+    <div class="msg ${side}-msg${statusClass}">
       <div class="msg-img" style="background-image: url(${img})"></div>
 
       <div class="msg-bubble">
         <div class="msg-info">
           <div class="msg-info-name">${name}</div>
-          <div class="msg-info-time">${formatDate(new Date())}</div>
+          <div class="msg-info-time">${time}</div>
         </div>
 
         <div class="msg-text">${text}</div>
+
+        ${status}
       </div>
     </div>
   `;
@@ -74,4 +99,37 @@ function formatDate(date) {
 
 function random(min, max) {
   return Math.floor(Math.random() * (max - min) + min);
+}
+
+const toggleConnection = document.querySelector(".conn-button")
+toggleConnection.addEventListener('click', (e) => {
+  e.preventDefault();
+  if (socket.connected) {
+    toggleConnection.innerText = 'Connect';
+    socket.disconnect();
+    toggleModalOne()
+  } else {
+    toggleConnection.innerText = 'Disconnect';
+    socket.connect();
+    toggleModalOne();
+    appendMissedMessages()
+  }
+});
+
+const appendMissedMessages = () => {
+    socket.on("missed-messages", (messages) => {
+        msgerChat.innerHTML = ""
+        messages.forEach((msg) => {
+            if(msg.id === user) {
+                appendMessage("You", msg.image, "right", msg.msg, false, msg.time);
+                const messageClass = document.querySelectorAll(".msg-status")
+                const lastMessage = messageClass[messageClass.length - 1]
+                lastMessage.querySelector("#status-text").textContent = "Sent"
+                lastMessage.querySelector("#status-text").style.color = "#84d36b"
+                lastMessage.querySelector("#status-img").innerHTML = "<img src='/assets/sent.svg' alt='sent'>"
+            } else {
+                appendMessage(msg.id, msg.image, "left", msg.msg, true, msg.time);
+            }
+        });
+    });
 }

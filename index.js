@@ -7,12 +7,29 @@ dotenv.config()
 
 const app = express()
 const server = http.createServer(app)
-const io = new Server(server)
+const io = new Server(server, {
+    connectionStateRecovery: {}
+})
+
+let messageQueue = []
 
 io.on('connection', (socket) => {
     console.log("A user connected with id: ", socket.id)
-    socket.on('user-message', (message) => {
-        socket.broadcast.emit('bot-message', {msg: message.msg, id: message.id, image: message.image});
+    socket.emit("missed-messages", messageQueue);
+    socket.on('user-message', (message, cb) => {
+        try {
+            messageQueue.push({msg: message.msg, id: message.id, image: message.image, time: message.time});
+
+            socket.broadcast.emit('bot-message', {msg: message.msg, id: message.id, image: message.image});
+            cb({
+                status: 'ok'
+            });
+        } catch (error) {
+            console.error("Error handling user-message:", error);
+            cb({
+              status: "error",
+            });
+        }
     })
     socket.on('disconnect', () => {
       console.log('user disconnected');
